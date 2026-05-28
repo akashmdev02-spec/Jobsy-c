@@ -23,22 +23,16 @@ public class AuthService {
         if (userRepository.existsByEmail(req.getEmail()))
             throw ApiException.conflict("Email already registered");
         
-        String verificationToken = java.util.UUID.randomUUID().toString();
-        
         User u = User.builder()
                 .fullName(req.getFullName())
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(req.getPassword()))
                 .role(req.getRole())
                 .phone(req.getPhone())
-                .emailVerified(false)
-                .verificationToken(verificationToken)
+                .emailVerified(true)
                 .build();
                 
         u = userRepository.save(u);
-        
-        // Send Verification Email
-        emailService.sendVerificationEmail(u.getEmail(), verificationToken, u.getFullName());
         
         String token = jwtService.generate(u.getEmail(), u.getRole().name(), u.getId());
         return new AuthResponse(token, u.getId(), u.getEmail(), u.getFullName(), u.getRole().name());
@@ -48,10 +42,6 @@ public class AuthService {
         var u = userRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new ApiException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid credentials"));
                 
-        if (!u.isEmailVerified()) {
-            throw ApiException.forbidden("Email not verified. Please check your inbox for verification link.");
-        }
-
         try {
             authManager.authenticate(new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword()));
         } catch (BadCredentialsException e) {
