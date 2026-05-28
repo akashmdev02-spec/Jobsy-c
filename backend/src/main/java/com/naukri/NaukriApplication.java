@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
+@org.springframework.scheduling.annotation.EnableAsync
 public class NaukriApplication {
     public static void main(String[] args) {
         SpringApplication.run(NaukriApplication.class, args);

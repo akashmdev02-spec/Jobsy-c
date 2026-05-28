@@ -15,6 +15,7 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
+    @org.springframework.scheduling.annotation.Async
     public void sendVerificationEmail(String toEmail, String token, String fullName) {
 
         String verificationLink =
@@ -61,6 +62,7 @@ public class EmailService {
         }
     }
 
+    @org.springframework.scheduling.annotation.Async
     public void sendStatusUpdateEmail(
             String toEmail,
             String jobTitle,
