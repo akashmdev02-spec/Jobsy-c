@@ -1,17 +1,11 @@
 const tls = require('tls');
 
-const username = 'akash.mdev.0.2@gmail.com';
-const passwords = [
-  'spzsisqelekfwlse',
-  'spzsisqelekfw1se', // trying number 1 instead of l
-  'spzs isqe lekf wlse',
-  'spzs1sqelekfwlse',
-  'spzsiseqelekfslse'
-];
+const username = process.env.SPRING_MAIL_USERNAME || 'placeholder@gmail.com';
+const password = process.env.SPRING_MAIL_PASSWORD || 'placeholder_password';
 
-function testPassword(password) {
+function testPassword(pwd) {
   return new Promise((resolve) => {
-    console.log(`[SMTP] Connecting to smtp.gmail.com:465 for password: '${password}'...`);
+    console.log(`[SMTP] Connecting to smtp.gmail.com:465...`);
     
     const socket = tls.connect(465, 'smtp.gmail.com', {}, () => {
       console.log('[SMTP] Connected!');
@@ -30,12 +24,10 @@ function testPassword(password) {
         socket.write('AUTH LOGIN\r\n');
         step = 2;
       } else if (data.startsWith('334') && step === 2) {
-        // Send base64 username
         socket.write(Buffer.from(username).toString('base64') + '\r\n');
         step = 3;
       } else if (data.startsWith('334') && step === 3) {
-        // Send base64 password
-        socket.write(Buffer.from(password).toString('base64') + '\r\n');
+        socket.write(Buffer.from(pwd).toString('base64') + '\r\n');
         step = 4;
       } else if (data.startsWith('235') && step === 4) {
         console.log('[SMTP SUCCESS] Authentication successful!');
@@ -52,21 +44,7 @@ function testPassword(password) {
       console.error('[SMTP ERR]', err.message);
       resolve(false);
     });
-    
-    socket.on('close', () => {
-      console.log('[SMTP CLOSE] Connection closed.');
-    });
   });
 }
 
-async function run() {
-  for (const pwd of passwords) {
-    const success = await testPassword(pwd);
-    if (success) {
-      console.log(`\n==== FOUND WORKING PASSWORD: ${pwd} ====\n`);
-      break;
-    }
-  }
-}
-
-run();
+testPassword(password);
