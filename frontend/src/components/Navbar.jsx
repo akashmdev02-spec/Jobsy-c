@@ -1,13 +1,19 @@
 import React from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { Briefcase, Search, Bookmark, User, LogOut, LayoutDashboard, PlusCircle, Building } from 'lucide-react';
+import { Briefcase, Search, User, LogOut, LayoutDashboard, Menu, X } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -31,17 +37,28 @@ export default function Navbar() {
           </svg>
         </Link>
 
-        <ul className="nav-menu">
-          <li>
-            <NavLink to="/jobs" className={({ active }) => active ? 'nav-link active' : 'nav-link'}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Search size={16} /> Explore Jobs
-              </span>
-            </NavLink>
-          </li>
-          
-          {user && user.role === 'JOB_SEEKER' && (
-            <>
+        {/* Hamburger Menu Toggle Button */}
+        <button 
+          className="navbar-toggle" 
+          onClick={() => setIsOpen(!isOpen)} 
+          aria-label="Toggle navigation menu"
+          aria-expanded={isOpen}
+        >
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        {/* Collapsible Menu Container */}
+        <div className={`navbar-collapse ${isOpen ? 'open' : ''}`}>
+          <ul className="nav-menu">
+            <li>
+              <NavLink to="/jobs" className={({ active }) => active ? 'nav-link active' : 'nav-link'}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Search size={16} /> Explore Jobs
+                </span>
+              </NavLink>
+            </li>
+            
+            {user && user.role === 'JOB_SEEKER' && (
               <li>
                 <NavLink to="/dashboard" className={({ active }) => active ? 'nav-link active' : 'nav-link'}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -49,11 +66,9 @@ export default function Navbar() {
                   </span>
                 </NavLink>
               </li>
-            </>
-          )}
+            )}
 
-          {user && user.role === 'RECRUITER' && (
-            <>
+            {user && user.role === 'RECRUITER' && (
               <li>
                 <NavLink to="/dashboard" className={({ active }) => active ? 'nav-link active' : 'nav-link'}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -61,11 +76,9 @@ export default function Navbar() {
                   </span>
                 </NavLink>
               </li>
-            </>
-          )}
+            )}
 
-          {user && user.role === 'ADMIN' && (
-            <>
+            {user && user.role === 'ADMIN' && (
               <li>
                 <NavLink to="/dashboard" className={({ active }) => active ? 'nav-link active' : 'nav-link'}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -73,32 +86,32 @@ export default function Navbar() {
                   </span>
                 </NavLink>
               </li>
-            </>
-          )}
-        </ul>
+            )}
+          </ul>
 
-        <div className="nav-actions">
-          {user ? (
-            <>
-              <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px' }}>
-                  <User size={16} />
-                  <span>{user.fullName}</span>
-                  <span className="profile-role-tag" style={{ fontSize: '0.7rem', textTransform: 'lowercase', padding: '1px 5px' }}>
-                    {user.role === 'RECRUITER' ? 'recruiter' : user.role === 'ADMIN' ? 'admin' : 'seeker'}
-                  </span>
-                </div>
-              </Link>
-              <button onClick={handleLogout} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px' }}>
-                <LogOut size={16} /> Log Out
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/login" className="btn btn-secondary">Sign In</Link>
-              <Link to="/register" className="btn btn-primary">Register</Link>
-            </>
-          )}
+          <div className="nav-actions">
+            {user ? (
+              <>
+                <Link to="/profile" className="profile-btn-link" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px' }}>
+                    <User size={16} />
+                    <span>{user.fullName}</span>
+                    <span className="profile-role-tag" style={{ fontSize: '0.7rem', textTransform: 'lowercase', padding: '1px 5px' }}>
+                      {user.role === 'RECRUITER' ? 'recruiter' : user.role === 'ADMIN' ? 'admin' : 'seeker'}
+                    </span>
+                  </div>
+                </Link>
+                <button onClick={handleLogout} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px' }}>
+                  <LogOut size={16} /> Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="btn btn-secondary">Sign In</Link>
+                <Link to="/register" className="btn btn-primary">Register</Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </nav>
